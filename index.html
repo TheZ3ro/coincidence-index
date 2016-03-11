@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Index of Coincidence Calculator</title>
+<link rel="stylesheet" href="css/main.css"/>
+<script src="js/vendor/jquery.min.js"></script>
+<script src="dict.js"></script>
+<script src="gen.js"></script>
+</head>
+<body>
+<div class="page">
+
+<h1>Index of Coincidence Calculator</h1>
+<p style="color:gray;">by TheZero</p>
+<hr/>
+
+<div class="enc">
+	<fieldset id="encoding">
+		<ol>
+			<li>
+				<label class="box" for="plain">Insert Ciphertext Here:</label>
+				<textarea class="text-input" id="cipher"></textarea>
+				<textarea class="text-input" id="decipher" readonly="readonly"></textarea>
+				<input type="button" id="passkey" value="Clear" onClick="clear_DOM()"/>
+		 </li>
+		 <hr/>
+		 <li>
+			 <label class="box" for="plain">Monoalphabetic Operation </label>
+				<input type="button" id="passkey" value="Guess Text Language" onClick="lang_guess()"/>
+				<input type="button" id="passkey" value="Guess Shift Key" onClick="shift_guess()"/>
+				<br/>
+				<span>Shift by: </span><input type="text" id="shift_key"/><input type="button" id="passkey" value="Shift" onClick="shift_text()"/>
+				<br/>
+				<span class="result" id="lang_result"></span>
+				<br/>
+				<span class="result" id="shift_result"></span>
+				<div id="table_mono"></div>
+		 </li>
+		 <hr/>
+		 <li>
+				<label class="box" for="plain">Polialphabetic Operation </label>
+				<span class="box" for="plain">Insert Key-Length Guess Here:</span>
+				<input type="text" id="key_len"/><br/>
+				<input type="button" id="passkey" value="Guess" onClick="key_len_guess()"/>
+				<input type="button" id="passkey" value="Bruteforce Keylen Guess" onClick="brute_len_guess()"/>
+				<div id="table"></div>
+		 </li>
+		</ol>
+	</fieldset>
+</div>
+
+</div> <!-- page -->
+</body>
+</html>
