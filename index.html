@@ -29,7 +29,8 @@
 				<input type="button" id="passkey" value="Guess Text Language" onClick="lang_guess()"/>
 				<input type="button" id="passkey" value="Guess Shift Key" onClick="shift_guess()"/>
 				<br/>
-				<span>Shift by: </span><input type="text" id="shift_key"/><input type="button" id="passkey" value="Shift" onClick="shift_text()"/>
+				<span>Shift by: </span><input type="text" id="shift_key"/>
+				<input type="button" id="passkey" value="Shift" onClick="shift_text()"/>
 				<br/>
 				<span class="result" id="lang_result"></span>
 				<br/>
@@ -40,10 +41,13 @@
 		 <li>
 				<label class="box" for="plain">Polialphabetic Operation </label>
 				<span class="box" for="plain">Insert Key-Length Guess Here:</span>
-				<input type="text" id="key_len"/><br/>
-				<input type="button" id="passkey" value="Guess" onClick="key_len_guess()"/>
-				<input type="button" id="passkey" value="Bruteforce Keylen Guess" onClick="brute_len_guess()"/>
+				<input type="text" id="key_len"/>
+				<input type="button" id="passkey" value="Guess Keylen" onClick="keylen_guess($('#key_len').val())"/>
+				<br/>
+				<input type="button" id="passkey" value="Bruteforce Keylen" onClick="brute_keylen()"/>
+				<input type="button" id="passkey" value="Bruteforce Key" onClick="brute_key()"/>
 				<div id="table"></div>
+				<span class="result" id="key_result"></span>
 		 </li>
 		</ol>
 	</fieldset>

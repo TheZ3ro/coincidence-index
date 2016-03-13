@@ -3,36 +3,37 @@ lang = [
  ["Italian",0.075],
  ["English", 0.065],
 ]
-treshold = 0.003
+treshold = 0.0049
 
 String.prototype.count = function (string) {
   return (this.match(new RegExp(string,'g')) || []).length
 }
 
-function mod(x, y) {
+var mod = function(x, y) {
 	 return (x % y + y) % y;
 }
 
-function ctoi(char){
+var ctoi = function(char){
  return char.charCodeAt(0)
 }
 
-function IC(string) {
+/*
+---- Math Funciton ----
+*/
+
+var IC = function(string) {
   var n = string.length
   var freq = IC_dict(string)
   // Sum of - fi*(fi-1)
   var sum = 0
-  var c=n
   for(var i=0;i<26;i++){
     temp = freq[i]-1
-    c-=freq[i]
     sum += (freq[i]*temp)
   }
-  console.log(sum+" "+n+" "+c)
   return sum/(n*(n-1))
 }
 
-function IC_dict(string){
+var IC_dict = function(string){
   var freq = []
   // Single Char frequency - fi
   for(var i=0;i<26;i++){
@@ -41,7 +42,20 @@ function IC_dict(string){
   return freq
 }
 
-function shift(str,key){
+var IMC = function(str1,str2){
+  var n1 = str1.length
+  var n2 = str2.length
+  var freq1 = IC_dict(str1)
+  var freq2 = IC_dict(str2)
+  // Sum of - fi1*fi2
+  var sum = 0
+  for(var i=0;i<26;i++){
+    sum += (freq1[i]*freq2[i])
+  }
+  return sum/(n1*n2)
+}
+
+var shift = function(str,key){
   var result = ""
   for (var i = 0; i < str.length; i++) {
     var c = str.charCodeAt(i)
@@ -52,7 +66,7 @@ function shift(str,key){
   return result
 }
 
-function filter(string) {
+var filter = function(string) {
   var string = string.toLowerCase()
   var ret = ""
   for(var i=0;i<string.length;i++){
@@ -64,7 +78,7 @@ function filter(string) {
   return ret
 }
 
-function divide(string, part){
+var divide = function(string, part){
   var arr = []
   for(var i=0;i<part;i++){
     arr.push("")
@@ -75,16 +89,19 @@ function divide(string, part){
   return arr
 }
 
-function check_lang(ic_val){
-  var l = null
+var check_lang = function(ic_val){
+  var l = []
   for(var i=0;i<lang.length;i++){
     if(i==0){
-      if(lang[0][1]>ic_val){
-        l = lang[i][0]
+      if(lang[0][1]+treshold>ic_val){
+        l[0] = lang[i][0]
+        l[1] = i
+        break
       }
     }else{
       if(ic_val<lang[i][1]+treshold && ic_val>lang[i][1]-treshold){
-        l = lang[i][0]
+        l[0] = lang[i][0]
+        l[1] = i
         break
       }
     }
@@ -92,7 +109,7 @@ function check_lang(ic_val){
   return l
 }
 
-function get_entropy(str,dict) {
+var get_entropy = function(str,dict) {
  	var sum = 0
  	var ignored = 0
  	for (var i = 0; i < str.length; i++) {
@@ -104,12 +121,16 @@ function get_entropy(str,dict) {
  	return -sum / Math.log(2) / (str.length - ignored)
 }
 
-function get_all_entropies(str,dict) {
+var get_all_entropies = function(str,dict) {
  	var result = new Array(26)
  	for (var i = 0; i < 26; i++)
   		result[i] = [i, get_entropy(shift(str, i),dict)]
  	return result
 }
+
+/*
+---- GUI Funciton ----
+*/
 
 function lang_guess(){
   var string = $("#cipher").val()
@@ -118,22 +139,18 @@ function lang_guess(){
   console.log(ic_val)
   var msg = "Text's Coincidence Index is: "+ic_val.toFixed(4)
   var l = check_lang(ic_val)
-  if(l!=null){
-    msg += "<br/>Language is: "+l
+  if(l[0]!=null){
+    msg += "<br/>Language is: "+l[0]
   }
   $("#lang_result").html(msg)
   return l
 }
 
-function key_len_guess(){
-  key_guess($("#key_len").val())
-}
-
-function brute_len_guess(){
+function brute_keylen(){
   for(var i=1;i<15;i++){
-    r=key_guess(i)
-    if(r==true){
-      break
+    r=keylen_guess(i)
+    if(r!=null){
+      return r
     }
   }
 }
@@ -152,21 +169,18 @@ function shift_text(){
 
 function shift_guess(){
   var l = lang_guess()
-  for(var i=0;i<lang.length;i++){
-    if(l==lang[i][0]){
-      l=i
-      break
-    }
-  }
   var langObj = null
-  if(l==1 || l==2){
-     langObj = DICT[l]
+  if(l[1]==1 || l[1]==2){
+    langObj = DICT[l[1]]
+  }else{
+    $("#shift_result").html("Can't detect the text language, probably it's a Polialphabetic Ciphertext")
+    return
   }
 
   var string = $("#cipher").val()
   string = filter(string)
 
-  entropies = get_all_entropies(string,langObj)
+  entropies = get_shift_entropies(string,langObj)
  	entropies.sort(function(x, y) {
   		// Compare by lowest entropy, break ties by lowest shift
   		if (x[1] < y[1]) return -1
@@ -196,7 +210,7 @@ function shift_guess(){
   $("#decipher").val(shift(string,best_shift))
 }
 
-function key_guess(kl){
+function keylen_guess(kl){
   var keylen = kl
   var found = false
   if(keylen=="" || isNaN(keylen)){
@@ -221,17 +235,76 @@ function key_guess(kl){
       }
       var media = sum/keylen
       var l = check_lang(media)
-      if(l!=null && l!=lang[0][0]){
-        $tbody.append('<tr />').append("<td class='found'>Found language: "+l+"!</td>")
+      if(l.length!=0 && l[0]!=lang[0][0]){
+        $tbody.append('<tr />').append("<td class='found'>Found language: "+l[0]+"!</td>")
         found = true
       }
+
+      $table.appendTo('#table')
+      if(found==true) return [ic_arr,arr]
     } else {
       alert("Divide Error!")
     }
-
-    $table.appendTo('#table')
-    return found
   }
+  return null
+}
+
+function brute_key(){
+  var o = brute_keylen()
+  var arr = o[1], lang = o[0]
+  var k = []
+  var ic = 0
+
+  for(var i=0;i<arr.length-1;i++){
+    imc = IMC(arr[i],arr[i+1])
+    if(imc<0.05){
+      for(var j=1;j<26;j++){
+        shifted = shift(arr[i+1],j)
+        imc = IMC(arr[i],shifted)
+        if(imc>0.05){
+          k.push(j)
+          ic += imc
+          break
+        }
+      }
+    }else{
+      k.push(0)
+      ic += imc
+    }
+  }
+  ic = ic/k.length
+  // find out the best K(0)
+  var l = check_lang(ic)
+  var langObj = null
+  if(l[1]==1 || l[1]==2){
+    langObj = DICT[l[1]]
+  }else{
+    $("#key_result").html("Can't detect the text language :(")
+    return
+  }
+  console.log(k+" "+langObj)
+  // Bruteforce entroy on C(0) with K(0)
+  entropies = get_all_entropies(arr[0],langObj)
+  entropies.sort(function(x, y) {
+    // Compare by lowest entropy, break ties by lowest shift
+    if (x[1] < y[1]) return -1
+    else if (x[1] > y[1]) return 1
+    else if (x[0] < y[0]) return -1
+    else if (x[0] > y[0]) return 1
+    else return 0
+  });
+
+  var best_shift = entropies[0][0]
+  var msg = "Best entropy shift for K<sub>0</sub> is: "+best_shift+"<br/>"
+  // Now find the other shift
+  var key = String.fromCharCode(best_shift+97)
+  var prec = best_shift
+  for(var i=0;i<k.length;i++){
+    prec = mod(prec + k[i],26)
+    key += String.fromCharCode(prec+97)
+  }
+  msg += "The most probable key is: "+key
+  $("#key_result").html(msg)
 }
 
 function clear_DOM(){
