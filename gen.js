@@ -249,28 +249,24 @@ function keylen_guess(kl){
   return null
 }
 
-function brute_key(){
-  var o = brute_keylen()
-  var arr = o[1], lang = o[0]
+function guess_key(){
+  var arr = brute_keylen()[1]
   var k = []
   var ic = 0
+  var max = [null,0.0000]
 
   for(var i=0;i<arr.length-1;i++){
     imc = IMC(arr[i],arr[i+1])
-    if(imc<0.05){
-      for(var j=1;j<26;j++){
-        shifted = shift(arr[i+1],j)
-        imc = IMC(arr[i],shifted)
-        if(imc>0.05){
-          k.push(j)
-          ic += imc
-          break
-        }
+    max = [0,imc]
+    for(var j=1;j<26;j++){
+      shifted = shift(arr[i+1],j)
+      imc = IMC(arr[i],shifted)
+      if(imc>max[1]){
+        max = [j,imc]
       }
-    }else{
-      k.push(0)
-      ic += imc
     }
+    k.push(max[0])
+    ic += max[1]
   }
   ic = ic/k.length
   // find out the best K(0)
