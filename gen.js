@@ -57,11 +57,23 @@ var IMC = function(str1,str2){
 
 var shift = function(str,key){
   var result = ""
-  for (var i = 0; i < str.length; i++) {
-    var c = str.charCodeAt(i)
-    if      (c >= 65 && c <=  90) result += String.fromCharCode(mod(c - 65 - key, 26) + 65)  // Uppercase
-    else if (c >= 97 && c <= 122) result += String.fromCharCode(mod(c - 97 - key, 26) + 97)  // Lowercase
-    else result += str.charAt(i)  // Copy
+  if(typeof key == "string"){
+    // Vigenere
+    for (var i = 0; i < str.length; i++) {
+      var index = i%key.length
+      var c = str.charCodeAt(i)
+      if      (c >= 65 && c <=  90) result += String.fromCharCode(mod(c - key.charCodeAt(index), 26) + 65)  // Uppercase
+      else if (c >= 97 && c <= 122) result += String.fromCharCode(mod(c - key.charCodeAt(index), 26) + 97)  // Lowercase
+      else result += str.charAt(i)  // Copy
+    }
+  }else{
+    // Shift
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i)
+      if      (c >= 65 && c <=  90) result += String.fromCharCode(mod(c - 65 - key, 26) + 65)  // Uppercase
+      else if (c >= 97 && c <= 122) result += String.fromCharCode(mod(c - 97 - key, 26) + 97)  // Lowercase
+      else result += str.charAt(i)  // Copy
+    }
   }
   return result
 }
@@ -301,6 +313,11 @@ function guess_key(){
   }
   msg += "The most probable key is: "+key
   $("#key_result").html(msg)
+
+  var dec = ""
+  var string = $("#cipher").val()
+  string = filter(string)
+  $("#decipher").val(shift(string,key))
 }
 
 function clear_DOM(){
@@ -309,4 +326,5 @@ function clear_DOM(){
   $("#decipher").val("")
   $("#shift_result").html("")
   $("#lang_result").html("")
+  $("#key_result").html("")
 }
