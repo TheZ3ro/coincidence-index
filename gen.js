@@ -192,7 +192,7 @@ function shift_guess(){
   var string = $("#cipher").val()
   string = filter(string)
 
-  entropies = get_shift_entropies(string,langObj)
+  entropies = get_all_entropies(string,langObj)
  	entropies.sort(function(x, y) {
   		// Compare by lowest entropy, break ties by lowest shift
   		if (x[1] < y[1]) return -1
